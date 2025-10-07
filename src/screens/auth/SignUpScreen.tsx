@@ -5,17 +5,17 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
-import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';
+import { COLORS, SPACING, FONT_SIZES, FONT_FAMILIES } from '../../constants/theme';
 
 type SignUpScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
@@ -170,10 +170,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.text,
     marginBottom: SPACING.sm,
+    fontFamily: FONT_FAMILIES.bold,
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
     color: COLORS.textSecondary,
+    fontFamily: FONT_FAMILIES.medium,
   },
   form: {
     gap: SPACING.lg,
@@ -185,9 +187,10 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
     color: COLORS.text,
+    fontFamily: FONT_FAMILIES.semiBold,
   },
   input: {
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.background,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
     borderRadius: 12,
@@ -195,6 +198,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     borderWidth: 1,
     borderColor: COLORS.border,
+    fontFamily: FONT_FAMILIES.regular,
   },
   button: {
     backgroundColor: COLORS.primary,
@@ -209,7 +213,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFFFFF',
     fontSize: FONT_SIZES.md,
-    fontWeight: '600',
+    fontFamily: FONT_FAMILIES.semiBold,
   },
   linkButton: {
     alignItems: 'center',
@@ -218,10 +222,11 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
+    fontFamily: FONT_FAMILIES.regular,
   },
   linkTextBold: {
     color: COLORS.primary,
-    fontWeight: '600',
+    fontFamily: FONT_FAMILIES.semiBold,
   },
 });
 

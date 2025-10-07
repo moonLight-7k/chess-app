@@ -4,11 +4,12 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types';
-import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';
+import { COLORS, SPACING, FONT_SIZES, FONT_FAMILIES } from '../../constants/theme';
+import { getFont, typography } from '@/utils/typography';
 
 type WelcomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
@@ -65,12 +66,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.text,
     marginBottom: SPACING.md,
+    fontFamily: FONT_FAMILIES.bold,
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
     color: COLORS.textSecondary,
     textAlign: 'center',
     paddingHorizontal: SPACING.xl,
+    fontFamily: FONT_FAMILIES.medium,
   },
   buttonContainer: {
     gap: SPACING.md,
@@ -85,6 +88,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
+    fontFamily: FONT_FAMILIES.semiBold,
   },
   secondaryButton: {
     backgroundColor: 'transparent',
@@ -98,6 +102,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
+    fontFamily: FONT_FAMILIES.medium,
   },
 });
 

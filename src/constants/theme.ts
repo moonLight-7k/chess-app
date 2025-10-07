@@ -1,18 +1,15 @@
 export const COLORS = {
-  primary: '#007AFF',
-  secondary: '#5856D6',
-  success: '#34C759',
+  primary: '#8E47FF',
+  secondary: '#19F0A1',
+  success: '#19F0A1',
   warning: '#FF9500',
   error: '#FF3B30',
-  background: '#FFFFFF',
-  backgroundDark: '#000000',
+  background: '#0F111A',
   card: '#F2F2F7',
-  cardDark: '#1C1C1E',
-  text: '#000000',
-  textDark: '#FFFFFF',
-  textSecondary: '#8E8E93',
-  border: '#C6C6C8',
-  borderDark: '#38383A',
+  text: '#FAFAFA',
+  textSecondary: '#B3B3B3',
+  border: '#363949',
+  highlight: "#8E47FF",
 };
 
 export const SPACING = {
@@ -32,3 +29,21 @@ export const FONT_SIZES = {
   xl: 24,
   xxl: 32,
 };
+
+export const FONT_FAMILIES = {
+  regular: 'Orbitron-Regular',
+  medium: 'Orbitron-Medium',
+  semiBold: 'Orbitron-SemiBold',
+  bold: 'Orbitron-Bold',
+  extraBold: 'Orbitron-ExtraBold',
+  black: 'Orbitron-Black',
+};
+
+export const FONT_WEIGHTS = {
+  regular: '400',
+  medium: '500',
+  semiBold: '600',
+  bold: '700',
+  extraBold: '800',
+  black: '900',
+} as const;

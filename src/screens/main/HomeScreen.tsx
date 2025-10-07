@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';
+import { typography, getFont } from '../../utils/typography';
 
 const HomeScreen = () => {
   const { user } = useAuth();
@@ -71,11 +73,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.text,
     marginBottom: SPACING.xs,
+    fontFamily: getFont('bold').fontFamily,
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
     color: COLORS.textSecondary,
     marginBottom: SPACING.xl,
+    fontFamily: getFont('medium').fontFamily,
   },
   section: {
     marginBottom: SPACING.xl,

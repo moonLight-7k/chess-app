@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Expo-Mobile-App-Template",
-    "slug": "Expo-Mobile-App-Template",
+    "name": "chess Duel",
+    "slug": "chess-duel",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,19 +13,33 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.moonlight7k.chessDuel",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "googleServicesFile": "./google-services.json"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.moonlight7k.ExpoMobileAppTemplate"
+      "package": "com.moonlight7k.chessDuel"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "fonts": [
+      "./assets/fonts/Orbitron-Regular.ttf",
+      "./assets/fonts/Orbitron-Medium.ttf",
+      "./assets/fonts/Orbitron-SemiBold.ttf",
+      "./assets/fonts/Orbitron-Bold.ttf",
+      "./assets/fonts/Orbitron-ExtraBold.ttf",
+      "./assets/fonts/Orbitron-Black.ttf"
+    ]
   }
 }

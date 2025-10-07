@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   Alert,
   Switch,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';
