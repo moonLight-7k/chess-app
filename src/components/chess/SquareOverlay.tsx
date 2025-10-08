@@ -1,24 +1,24 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { SIZE } from './Notation';
+import { SIZE, Position } from './Notation';
 
 interface SquareOverlayProps {
-    onSquarePress: (square: string) => void;
+    onSquarePress: (square: Position) => void;
 }
 
 const SquareOverlay: React.FC<SquareOverlayProps> = ({ onSquarePress }) => {
-    const squares: string[] = [];
+    const squares: Position[] = [];
 
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
-            const square = `${String.fromCharCode(97 + col)}${8 - row}`;
+            const square = `${String.fromCharCode(97 + col)}${8 - row}` as Position;
             squares.push(square);
         }
     }
 
     return (
         <View style={styles.container}>
-            {squares.map((square, index) => {
+            {squares.map((square: Position, index) => {
                 const row = Math.floor(index / 8);
                 const col = index % 8;
                 return (

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Chess } from 'chess.js';
 import { Position, toTranslation, SIZE } from './Notation';
+import { COLORS } from '@/constants/theme';
 
 interface LegalMovesProps {
     moves: Position[];
@@ -9,11 +10,13 @@ interface LegalMovesProps {
 }
 
 const LegalMoves: React.FC<LegalMovesProps> = ({ moves, chess }) => {
+    if (__DEV__) console.log('=== LegalMoves rendering with moves:', moves);
     return (
         <>
             {moves.map((position) => {
                 const { x, y } = toTranslation(position);
-                const isCapture = chess?.get(position as any) !== null;
+                const isCapture = chess?.get(position) !== null;
+                if (__DEV__) console.log(`Legal move indicator at ${position}: x=${x}, y=${y}, isCapture=${isCapture}`);
 
                 return (
                     <View
@@ -53,13 +56,14 @@ const styles = StyleSheet.create({
         width: SIZE * 0.3,
         height: SIZE * 0.3,
         borderRadius: SIZE * 0.15,
-        backgroundColor: 'rgba(128, 128, 128, 0.6)',
+        backgroundColor: 'rgba(0,0,0,0.6)',
     },
     captureRing: {
         width: SIZE * 0.3,
         height: SIZE * 0.3,
         borderRadius: SIZE * 0.15,
-        backgroundColor: 'rgba(128, 128, 128, 0.6)',
+        backgroundColor: COLORS.background,
+        opacity: 0.6
     },
 });
 

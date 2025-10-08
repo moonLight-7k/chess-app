@@ -72,8 +72,7 @@ interface PieceProps {
     id: Piece;
     startPosition: Vector;
     square: Position;
-    chess: Chess;
-    onTurn: () => void;
+    onMove: (from: Position, to: Position) => boolean;
     onSelect: (square: Position) => void;
     onSquarePress: (square: Position) => void;
     enabled: boolean;
@@ -84,8 +83,7 @@ const ChessPiece = ({
     id,
     startPosition,
     square,
-    chess,
-    onTurn,
+    onMove,
     onSelect,
     onSquarePress,
     enabled,
@@ -99,25 +97,31 @@ const ChessPiece = ({
 
     const movePiece = useCallback(
         (to: Position) => {
-            const moves = chess.moves({ verbose: true }) as Move[];
             const from = toPosition({ x: offsetX.value, y: offsetY.value });
-            const move = moves.find((m) => m.from === from && m.to === to);
-            const { x, y } = toTranslation(move ? move.to : from);
+
+            // Attempt the move through the centralized handler
+            const moveSuccessful = onMove(from, to);
+
+            // Get the final position for animation
+            const finalPosition = moveSuccessful ? to : from;
+            const { x, y } = toTranslation(finalPosition);
+
+            // Animate to final position (either destination if valid, or snap back if invalid)
             translateX.value = withTiming(
                 x,
-                { duration: 200 },
+                { duration: moveSuccessful ? 200 : 150 },
                 () => (offsetX.value = translateX.value)
             );
-            translateY.value = withTiming(y, { duration: 200 }, () => {
-                offsetY.value = translateY.value;
-                isGestureActive.value = false;
-            });
-            if (move) {
-                chess.move({ from, to });
-                onTurn();
-            }
+            translateY.value = withTiming(
+                y,
+                { duration: moveSuccessful ? 200 : 150 },
+                () => {
+                    offsetY.value = translateY.value;
+                    isGestureActive.value = false;
+                }
+            );
         },
-        [chess, isGestureActive, offsetX, offsetY, onTurn, translateX, translateY]
+        [isGestureActive, offsetX, offsetY, onMove, translateX, translateY]
     );
 
     const handleTap = useCallback(() => {

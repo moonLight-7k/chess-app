@@ -46,38 +46,56 @@ const Board: React.FC<BoardProps> = ({ onTurn }) => {
 
     const legalMoves = useMemo(() => {
         if (!selectedSquare) return [];
-        return (chess.moves({
-            square: selectedSquare as any,
+        const moves = (chess.moves({
+            square: selectedSquare,
             verbose: true
         }) as Move[]).map(move => move.to);
-    }, [selectedSquare, chess]);
+        return moves;
+    }, [selectedSquare, chess, state.board]);
 
     const handleTurn = useCallback(() => {
         setState({
-            player: state.player === 'w' ? 'b' : 'w',
+            player: chess.turn(),
             board: chess.board(),
         });
-        setSelectedSquare(null); // Clear selection after move
+        setSelectedSquare(null);
         onTurn?.(chess);
-    }, [chess, state.player, onTurn]);
+    }, [chess, onTurn]);
+
+    // Centralized move function - single source of truth for all moves
+    const makeMove = useCallback((from: Position, to: Position): boolean => {
+        const move = chess.move({ from, to });
+        if (move) {
+            handleTurn();
+            return true;
+        }
+        return false;
+    }, [chess, handleTurn]);
 
     const handlePieceSelect = useCallback((square: Position) => {
-        setSelectedSquare(prev => prev === square ? null : square);
+        setSelectedSquare(prev => {
+            const newValue = prev === square ? null : square;
+            if (__DEV__) console.log('New selectedSquare value:', newValue);
+            return newValue;
+        });
     }, []);
 
     const handleSquarePress = useCallback((square: Position) => {
-        if (selectedSquare && legalMoves.includes(square as any)) {
-            const move = chess.move({ from: selectedSquare as any, to: square as any });
-            if (move) {
-                handleTurn();
-            }
+        if (selectedSquare && legalMoves.includes(square)) {
+            if (__DEV__) console.log('Attempting to move from', selectedSquare, 'to', square);
+            const success = makeMove(selectedSquare, square);
+            if (__DEV__ && success) console.log('Move successful');
         } else {
-            const piece = chess.get(square as any);
+            const piece = chess.get(square);
+            if (__DEV__) console.log('Piece at square:', piece);
             if (piece && piece.color === state.player) {
+                if (__DEV__) console.log('Setting selected square to:', square);
                 setSelectedSquare(square);
+            } else {
+                if (__DEV__) console.log('No valid piece to select (piece:', piece, 'player:', state.player, ')');
             }
         }
-    }, [selectedSquare, legalMoves, chess, state.player, handleTurn]);
+    }, [selectedSquare, legalMoves, chess, state.player, makeMove]);
 
     const pieces = useMemo(() => {
         const piecesList: Array<{
@@ -106,27 +124,37 @@ const Board: React.FC<BoardProps> = ({ onTurn }) => {
         return piecesList;
     }, [state.board, state.player]);
 
+
     return (
         <View style={styles.container}>
             <Background checkedKingSquare={checkedKingSquare} />
             <LegalMoves moves={legalMoves} chess={chess} />
-            {pieces.map((piece) => (
-                <ChessPiece
-                    key={piece.key}
-                    id={piece.id}
-                    startPosition={piece.position}
-                    square={piece.square}
-                    chess={chess}
-                    onTurn={handleTurn}
-                    onSelect={handlePieceSelect}
-                    onSquarePress={handleSquarePress}
-                    enabled={piece.enabled}
-                    isSelected={piece.square === selectedSquare}
-                />
-            ))}
+            {pieces.map((piece) => {
+                const isSelected = piece.square === selectedSquare;
+
+                return (
+                    <ChessPiece
+                        key={piece.key}
+                        id={piece.id}
+                        startPosition={piece.position}
+                        square={piece.square}
+                        onMove={makeMove}
+                        onSelect={handlePieceSelect}
+                        onSquarePress={handleSquarePress}
+                        enabled={piece.enabled}
+                        isSelected={isSelected}
+                    />
+                );
+            })}
             <SquareOverlay onSquarePress={handleSquarePress} />
         </View>
     );
 };
 
-export default React.memo(Board);
+// Memo comparison function to prevent unnecessary re-renders
+const arePropsEqual = (prevProps: BoardProps, nextProps: BoardProps) => {
+    // Only re-render if onTurn callback changes (which it shouldn't if properly memoized in parent)
+    return prevProps.onTurn === nextProps.onTurn;
+};
+
+export default React.memo(Board, arePropsEqual);
