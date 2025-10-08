@@ -1,58 +1,115 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
-import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';
-import { typography, getFont } from '../../utils/typography';
+import { COLORS, SPACING, FONT_SIZES, FONT_FAMILIES } from '../../constants/theme';
+import { getFont } from '../../utils/typography';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MainStackParamList } from '../../types';
 
-const HomeScreen = () => {
+type HomeScreenProps = {
+  navigation: NativeStackNavigationProp<MainStackParamList, 'Home'>;
+};
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { user } = useAuth();
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.content}>
-          <Text style={styles.greeting}>
-            Hello, {user?.displayName || 'User'}!
-          </Text>
-          <Text style={styles.subtitle}>Welcome to your home screen</Text>
+      {/* Top Navigation Bar */}
+      <View style={styles.topNav}>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => {
+            // TODO: Implement wallet connection
+            console.log('Connect Wallet');
+          }}
+        >
+          <Icon name="wallet-outline" size={24} color={COLORS.text} />
+          <Text style={styles.navButtonText}>Wallet</Text>
+        </TouchableOpacity>
 
-          {/* Placeholder Content - Easy to customize */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Quick Stats</Text>
-            <View style={styles.statsContainer}>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>12</Text>
-                <Text style={styles.statLabel}>Active Items</Text>
-              </View>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>45</Text>
-                <Text style={styles.statLabel}>Completed</Text>
-              </View>
-            </View>
-          </View>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => navigation.navigate('Leaderboard')}
+        >
+          <Icon name="trophy-outline" size={24} color={COLORS.text} />
+          <Text style={styles.navButtonText}>Leaderboard</Text>
+        </TouchableOpacity>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <View style={styles.card}>
-              <Text style={styles.cardText}>
-                This is placeholder content. You can easily customize this
-                section to display your app's specific data.
-              </Text>
-            </View>
-          </View>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => navigation.navigate('Profile')}
+        >
+          <Icon name="person-outline" size={24} color={COLORS.text} />
+          <Text style={styles.navButtonText}>Profile</Text>
+        </TouchableOpacity>
+      </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Featured</Text>
-            <View style={styles.card}>
-              <Text style={styles.cardText}>
-                Add your featured content here. This could be anything from
-                featured products, articles, or user highlights.
-              </Text>
-            </View>
-          </View>
+      {/* User Stats */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statCard}>
+          <Icon name="person-circle" size={18} color={COLORS.primary} />
+          <Text style={styles.statValue}>{user?.displayName || 'Player'}</Text>
         </View>
-      </ScrollView>
+        <View style={styles.statItem}>
+          <Icon name="star" size={14} color={COLORS.warning} />
+          <Text style={styles.statValue}>1500</Text>
+          <Text style={styles.statLabel}>ELO</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Icon name="trophy" size={14} color={COLORS.success} />
+          <Text style={styles.statValue}>0</Text>
+          <Text style={styles.statLabel}>Wins</Text>
+        </View>
+      </View>
+
+      {/* Main Content */}
+      <View style={styles.content}>
+        {/* Title Section */}
+        <View style={styles.titleSection}>
+          <Text style={styles.mainTitle}>Choose Your Battle</Text>
+          <Text style={styles.subtitle}>Select how you want to compete</Text>
+        </View>
+
+        {/* Battle Mode Cards */}
+        <View style={styles.battleModeContainer}>
+          {/* Quick Match */}
+          <TouchableOpacity
+            style={styles.quickMatchCard}
+            onPress={() => navigation.navigate('Game')}
+            activeOpacity={0.8}
+          >
+            <Icon name="people" size={40} color={COLORS.text} />
+            <Text style={styles.cardTitle}>Quick Match</Text>
+            <Text style={styles.cardSubtitle}>Find random opponent</Text>
+          </TouchableOpacity>
+
+          {/* Challenge Friend */}
+          <TouchableOpacity
+            style={styles.challengeFriendCard}
+            activeOpacity={0.8}
+            disabled
+          >
+            <Icon name="person" size={40} color={COLORS.text} />
+            <Text style={styles.cardTitleDisabled}>Challenge Friend</Text>
+            <Text style={styles.cardSubtitleDisabled}>Coming Soon</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Bottom Section - Wallet & Rank */}
+      <View style={styles.bottomSection}>
+        <View style={styles.walletSection}>
+          <Text style={styles.walletLabel}>Connect Wallet</Text>
+          <Text style={styles.walletAddress}>7xKX...9Zqw</Text>
+        </View>
+        <View style={styles.rankSection}>
+          <Text style={styles.rankLabel}>Your Rank</Text>
+          <Text style={styles.rankValue}>#47</Text>
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
@@ -62,64 +119,195 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  scrollView: {
-    flex: 1,
+  topNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border || 'rgba(255, 255, 255, 0.1)',
+  },
+  navButton: {
+    alignItems: 'center',
+    padding: SPACING.sm,
+  },
+  navButtonText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.text,
+    marginTop: SPACING.xs,
+    fontFamily: FONT_FAMILIES.regular,
   },
   content: {
-    padding: SPACING.lg,
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
   },
-  greeting: {
-    fontSize: FONT_SIZES.xl,
+  titleSection: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  mainTitle: {
+    fontSize: FONT_SIZES.xl + 2,
     fontWeight: 'bold',
     color: COLORS.text,
-    marginBottom: SPACING.xs,
     fontFamily: getFont('bold').fontFamily,
+    textAlign: 'center',
+    marginBottom: SPACING.xs,
   },
   subtitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
-    marginBottom: SPACING.xl,
-    fontFamily: getFont('medium').fontFamily,
-  },
-  section: {
-    marginBottom: SPACING.xl,
-  },
-  sectionTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
+    fontFamily: getFont('regular').fontFamily,
+    textAlign: 'center',
   },
   statsContainer: {
     flexDirection: 'row',
-    gap: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    gap: SPACING.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border || 'rgba(255, 255, 255, 0.1)',
   },
   statCard: {
+    flex: 1,
+    backgroundColor: COLORS.card,
+    padding: SPACING.xs,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  statItem: {
+    flex: 0.7,
+    backgroundColor: COLORS.card,
+    padding: SPACING.xs,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  statValue: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    fontFamily: getFont('bold').fontFamily,
+  },
+  statLabel: {
+    fontSize: 9,
+    color: COLORS.textSecondary,
+    fontFamily: getFont('regular').fontFamily,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+    marginTop: 2,
+  },
+  battleModeContainer: {
+    flexDirection: 'column',
+    gap: SPACING.sm,
+    width: '100%',
+  },
+  quickMatchCard: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    padding: SPACING.lg,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 160,
+    shadowColor: COLORS.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  challengeFriendCard: {
     flex: 1,
     backgroundColor: COLORS.card,
     padding: SPACING.lg,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 160,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    opacity: 0.6,
   },
-  statValue: {
-    fontSize: FONT_SIZES.xxl,
+  cardTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    fontFamily: getFont('bold').fontFamily,
+    marginTop: SPACING.sm,
+    textAlign: 'center',
+  },
+  cardSubtitle: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.text,
+    fontFamily: getFont('regular').fontFamily,
+    marginTop: SPACING.xs,
+    textAlign: 'center',
+    opacity: 0.9,
+  },
+  cardTitleDisabled: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    fontFamily: getFont('bold').fontFamily,
+    marginTop: SPACING.sm,
+    textAlign: 'center',
+  },
+  cardSubtitleDisabled: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    fontFamily: getFont('regular').fontFamily,
+    marginTop: SPACING.xs,
+    textAlign: 'center',
+  },
+  bottomSection: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.card,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border || 'rgba(255, 255, 255, 0.1)',
+  },
+  walletSection: {
+    flex: 1,
+  },
+  walletLabel: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    fontFamily: getFont('regular').fontFamily,
+    marginBottom: 4,
+  },
+  walletAddress: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.text,
+    fontFamily: getFont('medium').fontFamily,
+  },
+  rankSection: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  rankLabel: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    fontFamily: getFont('regular').fontFamily,
+    marginBottom: 4,
+  },
+  rankValue: {
+    fontSize: FONT_SIZES.xl + 4,
     fontWeight: 'bold',
     color: COLORS.primary,
-    marginBottom: SPACING.xs,
-  },
-  statLabel: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-  },
-  card: {
-    backgroundColor: COLORS.card,
-    padding: SPACING.lg,
-    borderRadius: 12,
-  },
-  cardText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
+    fontFamily: getFont('bold').fontFamily,
   },
 });
 

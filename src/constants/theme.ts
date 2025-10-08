@@ -5,7 +5,7 @@ export const COLORS = {
   warning: '#FF9500',
   error: '#FF3B30',
   background: '#0F111A',
-  card: '#F2F2F7',
+  card: '#1D1F2B',
   text: '#FAFAFA',
   textSecondary: '#B3B3B3',
   border: '#363949',

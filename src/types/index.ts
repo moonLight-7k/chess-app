@@ -24,9 +24,10 @@ export type RootStackParamList = {
   Main: undefined;
 };
 
-export type MainTabParamList = {
+export type MainStackParamList = {
   Home: undefined;
-  Explore: undefined;
+  Game: undefined;
+  Leaderboard: undefined;
   Profile: undefined;
   Settings: undefined;
 };

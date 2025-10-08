@@ -10,10 +10,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';
+import { MainStackParamList } from '../../types';
 
-const SettingsScreen = () => {
+type SettingsScreenProps = {
+  navigation: NativeStackNavigationProp<MainStackParamList, 'Settings'>;
+};
+
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const { signOut } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = React.useState(false);
