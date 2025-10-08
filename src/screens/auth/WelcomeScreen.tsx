@@ -1,139 +1,116 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
+  Dimensions,
+  ImageBackground,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { RootStackParamList } from '../../types';
 import { COLORS, SPACING, FONT_SIZES, FONT_FAMILIES } from '../../constants/theme';
-import { getFont, typography } from '@/utils/typography';
 
 type WelcomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
 };
 
+const { height } = Dimensions.get('window');
+
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
-  const [connecting, setConnecting] = useState(false);
-
-  const handleConnectWallet = async (walletType: 'phantom' | 'backpack') => {
-    setConnecting(true);
-    try {
-      // TODO: Implement actual wallet connection
-      // For now, simulate connection and navigate to main app
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      Alert.alert(
-        'Wallet Connected',
-        `Successfully connected to ${walletType === 'phantom' ? 'Phantom' : 'Backpack'} wallet!`,
-        [
-          {
-            text: 'Continue',
-            onPress: () => navigation.navigate('SignUp'), // Will be replaced with proper navigation after auth setup
-          },
-        ]
-      );
-    } catch (error) {
-      Alert.alert('Connection Failed', 'Failed to connect wallet. Please try again.');
-    } finally {
-      setConnecting(false);
-    }
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Chess Branding */}
-        <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Icon name="extension-puzzle" size={80} color={COLORS.primary} />
+    <ImageBackground
+      source={require('../../../assets/welcome.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+      blurRadius={5}
+
+    >
+      <LinearGradient
+        colors={['#0F111A', '#19F0A133']}
+        style={styles.container}
+      >
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.content}>
+            {/* Header Section with Logo and Title */}
+            <View style={styles.header}>
+              <View style={styles.iconContainer}>
+                <Image
+                  source={require('../../../assets/splash-icon.png')}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.title}>Chess Duel</Text>
+              <Text style={styles.subtitle}>
+                Compete. Solve. Earn.
+              </Text>
+
+            </View>
+
+            {/* Main Action Buttons */}
+            <View style={styles.buttonContainer}>
+              {/* Sign Up Button - Primary */}
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={() => navigation.navigate('SignUp')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.primaryButtonText}>Sign Up</Text>
+                <Icon name="arrow-forward" size={20} color={COLORS.background} />
+              </TouchableOpacity>
+
+              {/* Login Button - Secondary */}
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={() => navigation.navigate('Login')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.secondaryButtonText}>Login</Text>
+              </TouchableOpacity>
+
+
+            </View>
+
+
           </View>
-          <Text style={styles.title}>Chess Puzzle Racing</Text>
-          <Text style={styles.subtitle}>
-            Connect your wallet to compete in real-time puzzle races
-          </Text>
-          <Text style={styles.description}>
-            Solve puzzles faster than your opponent, earn rewards, and climb the leaderboard
-          </Text>
-        </View>
-
-        {/* Wallet Connection Buttons */}
-        <View style={styles.buttonContainer}>
-          <Text style={styles.connectLabel}>Connect Wallet</Text>
-
-          <TouchableOpacity
-            style={[styles.walletButton, styles.phantomButton]}
-            onPress={() => handleConnectWallet('phantom')}
-            disabled={connecting}
-          >
-            <View style={styles.walletIconContainer}>
-              <Icon name="wallet" size={24} color="#AB9FF2" />
-            </View>
-            <Text style={styles.walletButtonText}>Phantom Wallet</Text>
-            <Icon name="chevron-forward" size={20} color={COLORS.textSecondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.walletButton, styles.backpackButton]}
-            onPress={() => handleConnectWallet('backpack')}
-            disabled={connecting}
-          >
-            <View style={styles.walletIconContainer}>
-              <Icon name="wallet" size={24} color={COLORS.secondary} />
-            </View>
-            <Text style={styles.walletButtonText}>Backpack Wallet</Text>
-            <Icon name="chevron-forward" size={20} color={COLORS.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Temporary Login Option (Remove after wallet integration) */}
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => navigation.navigate('Login')}
-            disabled={connecting}
-          >
-            <Text style={styles.secondaryButtonText}>
-              Continue with Email (Dev Mode)
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Info Footer */}
-        <View style={styles.footer}>
-          <Icon name="shield-checkmark" size={20} color={COLORS.success} />
-          <Text style={styles.footerText}>
-            Secure Web3 authentication via Solana blockchain
-          </Text>
-        </View>
-      </View>
-    </SafeAreaView>
+        </SafeAreaView>
+      </LinearGradient>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+  },
+  safeArea: {
+    flex: 1,
   },
   content: {
     flex: 1,
     justifyContent: 'space-between',
     padding: SPACING.lg,
+    paddingTop: height * 0.08,
+    paddingBottom: SPACING.xl,
   },
   header: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: SPACING.xxl,
   },
   iconContainer: {
     marginBottom: SPACING.xl,
-    padding: SPACING.lg,
-    backgroundColor: COLORS.card,
-    borderRadius: 100,
-    borderWidth: 3,
-    borderColor: COLORS.primary,
+  },
+  logo: {
+    width: 100,
+    height: 100,
   },
   title: {
     fontSize: FONT_SIZES.xxl + 4,
@@ -144,11 +121,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
+    fontSize: FONT_SIZES.lg,
+    color: COLORS.text,
     textAlign: 'center',
     paddingHorizontal: SPACING.xl,
-    fontFamily: FONT_FAMILIES.medium,
+    fontFamily: FONT_FAMILIES.semiBold,
     marginBottom: SPACING.sm,
   },
   description: {
@@ -162,24 +139,81 @@ const styles = StyleSheet.create({
   buttonContainer: {
     gap: SPACING.md,
   },
-  connectLabel: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
-    fontFamily: FONT_FAMILIES.bold,
-  },
-  walletButton: {
+  primaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md + 4,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 12,
+    gap: SPACING.sm,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  primaryButtonText: {
+    color: COLORS.background,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    fontFamily: FONT_FAMILIES.bold,
+  },
+  secondaryButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: SPACING.md + 4,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+  },
+  secondaryButtonText: {
+    color: COLORS.primary,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    fontFamily: FONT_FAMILIES.bold,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: SPACING.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  dividerText: {
+    paddingHorizontal: SPACING.md,
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    fontFamily: FONT_FAMILIES.medium,
+  },
+  walletLabel: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    fontFamily: FONT_FAMILIES.medium,
+    marginBottom: SPACING.sm,
+  },
+  walletButtonsRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  walletButton: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: COLORS.card,
     paddingVertical: SPACING.md + 2,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.sm,
     borderRadius: 12,
     borderWidth: 2,
     borderColor: COLORS.border,
-    gap: SPACING.md,
+    gap: SPACING.sm,
   },
   phantomButton: {
     borderColor: '#AB9FF2',
@@ -187,42 +221,18 @@ const styles = StyleSheet.create({
   backpackButton: {
     borderColor: COLORS.secondary,
   },
-  walletIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   walletButtonText: {
-    flex: 1,
     color: COLORS.text,
-    fontSize: FONT_SIZES.md,
-    fontWeight: '600',
-    fontFamily: FONT_FAMILIES.semiBold,
-  },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginTop: SPACING.sm,
-  },
-  secondaryButtonText: {
-    color: COLORS.textSecondary,
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
-    fontFamily: FONT_FAMILIES.medium,
+    fontFamily: FONT_FAMILIES.semiBold,
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: SPACING.sm,
-    paddingTop: SPACING.lg,
+    paddingTop: SPACING.md,
   },
   footerText: {
     fontSize: FONT_SIZES.xs,

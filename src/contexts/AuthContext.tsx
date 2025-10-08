@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { User } from '../types';
-import { mapFirebaseUser, signIn, signUp, signOut } from '../services/authService';
+import { mapFirebaseUser, signIn, signUp, signOut, resetPassword } from '../services/authService';
 import { useAppDispatch } from '../hooks/useRedux';
 import { setUser, setLoading, clearAuth } from '../store/authSlice';
 
@@ -12,6 +12,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName?: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -86,12 +87,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const handleResetPassword = async (email: string) => {
+    try {
+      await resetPassword(email);
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
     signIn: handleSignIn,
     signUp: handleSignUp,
     signOut: handleSignOut,
+    resetPassword: handleResetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

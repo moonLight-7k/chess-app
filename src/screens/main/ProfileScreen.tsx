@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,7 +14,7 @@ interface ProfileScreenProps {
 }
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   // Mock data - will be replaced with actual data
   const chessStats = {
@@ -45,6 +45,27 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     { id: 3, title: 'Privacy', icon: 'shield-outline' },
     { id: 4, title: 'Help & Support', icon: 'help-circle-outline' },
   ];
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+            } catch (error: any) {
+              Alert.alert('Error', error.message);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -176,6 +197,34 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 <Icon name="chevron-forward" size={20} color={COLORS.textSecondary} />
               </TouchableOpacity>
             ))}
+          </View>
+
+          {/* Account Actions */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Account</Text>
+
+            {/* Go to Settings Button */}
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <View style={styles.actionButtonLeft}>
+                <Icon name="settings-outline" size={24} color={COLORS.primary} />
+                <Text style={styles.actionButtonText}>App Settings</Text>
+              </View>
+              <Icon name="chevron-forward" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+
+            {/* Logout Button */}
+            <TouchableOpacity
+              style={[styles.actionButton, styles.logoutButton]}
+              onPress={handleSignOut}
+            >
+              <View style={styles.actionButtonLeft}>
+                <Icon name="log-out-outline" size={24} color={COLORS.error} />
+                <Text style={[styles.actionButtonText, styles.logoutText]}>Sign Out</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -419,6 +468,33 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     color: COLORS.text,
     fontWeight: '500',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.card,
+    padding: SPACING.md,
+    borderRadius: 12,
+    marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  actionButtonLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  actionButtonText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  logoutButton: {
+    borderColor: COLORS.error,
+  },
+  logoutText: {
+    color: COLORS.error,
   },
 });
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Animated, Vibration, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Animated, Vibration, ActivityIndicator, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Chess } from 'chess.js';
-import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';
+import { COLORS, SPACING, FONT_SIZES, FONT_FAMILIES } from '../../constants/theme';
 import { getFont } from '../../utils/typography';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../../types';
@@ -27,8 +27,10 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
     const [opponentProgress, setOpponentProgress] = useState(0); // 0-100
     const [playerProgress, setPlayerProgress] = useState(0);
     const [showMatchEndModal, setShowMatchEndModal] = useState(false);
-    const [puzzleObjective] = useState("Checkmate your opponent!");
+    const [showMenuModal, setShowMenuModal] = useState(false);
+    const [puzzleObjective, setPuzzleObjective] = useState("Checkmate your opponent!");
     const [moveCount, setMoveCount] = useState(0);
+    const [opponentMoveCount, setOpponentMoveCount] = useState(0);
     const [wagerAmount] = useState(0.05); // SOL wager amount
     const [matchResult, setMatchResult] = useState<{
         winner: 'you' | 'opponent' | 'draw';
@@ -154,7 +156,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
                 setTimer((prev) => prev + 1);
                 setOpponentTime((prev) => prev + 1);
 
-                // Simulate opponent progress
+                // Simulate opponent progress and moves
                 setOpponentProgress((prev) => {
                     const newProgress = prev + Math.random() * 2;
                     if (newProgress >= 100) {
@@ -163,6 +165,11 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
                     }
                     return Math.min(newProgress, 100);
                 });
+
+                // Randomly increment opponent move count
+                if (Math.random() > 0.7) {
+                    setOpponentMoveCount(prev => prev + 1);
+                }
             }, 1000);
         }
 
@@ -218,6 +225,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
     }, [handleMatchEnd]);
 
     const handleGiveUp = useCallback(() => {
+        setShowMenuModal(false);
         Alert.alert(
             'Give Up',
             'Are you sure you want to give up this match?',
@@ -234,6 +242,25 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
             ]
         );
     }, [handleMatchEnd]);
+
+    const handleExit = useCallback(() => {
+        setShowMenuModal(false);
+        Alert.alert(
+            'Exit Match',
+            'Are you sure you want to exit? You will forfeit this match.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Exit',
+                    style: 'destructive',
+                    onPress: () => {
+                        Vibration.vibrate(50);
+                        navigation.goBack();
+                    }
+                },
+            ]
+        );
+    }, [navigation]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -255,6 +282,10 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
                     <Text style={styles.headerTitle}>Puzzle Race</Text>
                     <TouchableOpacity
                         style={styles.menuButton}
+                        onPress={() => {
+                            Vibration.vibrate(30);
+                            setShowMenuModal(true);
+                        }}
                         accessible={true}
                         accessibilityLabel="Menu options"
                         accessibilityRole="button"
@@ -263,66 +294,68 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Game State Indicator */}
-                {gameState === 'waiting' && (
-                    <Animated.View
-                        style={[
-                            styles.waitingBanner,
-                            { opacity: waitingDotAnim }
-                        ]}
-                    >
-                        <ActivityIndicator color={COLORS.background} style={{ marginRight: SPACING.sm }} />
-                        <Text style={styles.waitingText}>Finding opponent...</Text>
-                    </Animated.View>
-                )}
+                {/* Players Info Section */}
+                <View style={styles.playersSection}>
 
-                {/* Opponent Info */}
-                <View style={styles.playerInfo}>
-                    <View style={styles.playerAvatar}>
-                        <Icon name="person" size={24} color={COLORS.error} />
-                    </View>
-                    <View style={styles.playerDetails}>
-                        <Text style={styles.playerName}>Opponent</Text>
-                        <Text style={styles.playerElo}>ELO: 1450</Text>
-                    </View>
-                    <View style={styles.timerContainer}>
-                        <Icon name="time" size={16} color={COLORS.textSecondary} style={{ marginRight: 4 }} />
-                        <Text style={styles.timerText}>{formatTime(opponentTime)}</Text>
-                    </View>
-                </View>
-
-                {/* Opponent Progress Bar */}
-                <View style={styles.progressBarContainer}>
-                    <Animated.View
-                        style={[
-                            styles.progressBar,
-                            {
-                                width: progressAnimOpponent.interpolate({
-                                    inputRange: [0, 100],
-                                    outputRange: ['0%', '100%']
-                                }),
-                                backgroundColor: COLORS.error
-                            }
-                        ]}
-                    />
-                </View>
-
-                {/* Puzzle Objective */}
-                <View style={styles.puzzleObjective}>
-                    <Icon name="bulb" size={20} color={COLORS.warning} />
-                    <Text style={styles.puzzleObjectiveText}>{puzzleObjective}</Text>
-                </View>
-
-                {/* Wager Display */}
-                {wagerAmount > 0 && (
-                    <View style={styles.wagerContainer}>
-                        <View style={styles.wagerBadge}>
-                            <Icon name="logo-bitcoin" size={16} color={COLORS.secondary} />
-                            <Text style={styles.wagerText}>{wagerAmount} SOL</Text>
+                    {/* Your Info */}
+                    <View style={[styles.playerCard, styles.yourPlayerCard]}>
+                        <View style={[styles.playerAvatar, styles.yourAvatar]}>
+                            <Icon name="person" size={20} color={COLORS.text} />
                         </View>
-                        <Text style={styles.wagerLabel}>Prize Pool</Text>
+                        <View style={styles.playerDetails}>
+                            <Text style={styles.playerName}>You</Text>
+                            <View style={styles.eloContainer}>
+                                <Icon name="trophy" size={10} color={COLORS.warning} />
+                                <Text style={styles.playerElo}>1500</Text>
+                            </View>
+                            <View style={styles.movesContainer}>
+                                <Icon name="git-commit-outline" size={10} color={COLORS.textSecondary} />
+                                <Text style={styles.movesText}>{moveCount} moves</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.progressIndicator}>
+                            <Text style={[styles.progressText, styles.yourProgressText]}>{Math.round(playerProgress)}%</Text>
+                        </View>
                     </View>
-                )}
+
+                    <View style={styles.timerContainer}>
+                        <Icon name="time-outline" size={28} color={COLORS.primary} />
+                        <Text style={styles.timerText}>{formatTime(timer)}</Text>
+                    </View>
+
+                    {/* Opponent Info */}
+                    <View style={styles.playerCard}>
+                        <View style={styles.playerAvatar}>
+                            <Icon name="person" size={20} color={COLORS.error} />
+                        </View>
+                        <View style={styles.playerDetails}>
+                            <Text style={styles.playerName}>Opponent</Text>
+                            <View style={styles.eloContainer}>
+                                <Icon name="trophy" size={10} color={COLORS.warning} />
+                                <Text style={styles.playerElo}>1450</Text>
+                            </View>
+                            <View style={styles.movesContainer}>
+                                <Icon name="git-commit-outline" size={10} color={COLORS.textSecondary} />
+                                <Text style={styles.movesText}>{opponentMoveCount} moves</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.progressIndicator}>
+                            <Text style={styles.progressText}>{Math.round(opponentProgress)}%</Text>
+                        </View>
+                    </View>
+
+                </View>
+
+                {/* Puzzle Objective Section */}
+                <View style={styles.objectiveSection}>
+                    <View style={styles.objectiveCard}>
+
+                        <Icon name="flag-outline" size={16} color={COLORS.secondary} />
+                        <Text style={styles.objectiveText}>{puzzleObjective}</Text>
+                    </View>
+                </View>
 
                 {/* Chess Board */}
                 <View style={styles.boardContainer}>
@@ -331,42 +364,29 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
                     </ErrorBoundary>
                 </View>
 
-                {/* Player Progress Bar */}
-                <View style={styles.progressBarContainer}>
-                    <Animated.View
-                        style={[
-                            styles.progressBar,
-                            {
-                                width: progressAnimPlayer.interpolate({
-                                    inputRange: [0, 100],
-                                    outputRange: ['0%', '100%']
-                                }),
-                                backgroundColor: COLORS.success
-                            }
-                        ]}
-                    />
-                </View>
-
-                {/* Your Info */}
-                <View style={[styles.playerInfo, styles.yourPlayerInfo]}>
-                    <View style={[styles.playerAvatar, styles.yourAvatar]}>
-                        <Icon name="person" size={24} color={COLORS.primary} />
+                {/* Wager Pool Section */}
+                {wagerAmount > 0 && (
+                    <View style={styles.bottomInfoSection}>
+                        <View style={styles.wagerPoolCard}>
+                            <View style={styles.wagerPoolRow}>
+                                <View style={styles.wagerPoolLeft}>
+                                    <Text style={styles.wagerLabel}>Wager Amount</Text>
+                                    <View style={styles.wagerAmountContainer}>
+                                        <Icon name="logo-bitcoin" size={20} color={COLORS.secondary} />
+                                        <Text style={styles.wagerAmount}>{wagerAmount} SOL</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.wagerPoolRight}>
+                                    <Text style={styles.wagerLabel}>Current Pool</Text>
+                                    <View style={styles.poolAmountContainer}>
+                                        <Text style={styles.poolAmount}>{(wagerAmount * 2).toFixed(2)} SOL</Text>
+                                        <Text style={styles.poolOdds}>2x odds</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
                     </View>
-                    <View style={styles.playerDetails}>
-                        <Text style={styles.playerName}>You</Text>
-                        <Text style={styles.playerElo}>ELO: 1500</Text>
-                    </View>
-                    <Animated.View
-                        style={[
-                            styles.timerContainer,
-                            styles.activeTimer,
-                            { transform: [{ scale: pulseAnim }] }
-                        ]}
-                    >
-                        <Icon name="time" size={16} color={COLORS.text} style={{ marginRight: 4 }} />
-                        <Text style={[styles.timerText, { color: COLORS.text }]}>{formatTime(timer)}</Text>
-                    </Animated.View>
-                </View>
+                )}
 
                 {/* Control Buttons */}
                 <View style={styles.controls}>
@@ -429,6 +449,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
                         setPlayerProgress(0);
                         setOpponentProgress(0);
                         setMoveCount(0);
+                        setOpponentMoveCount(0);
                         setTimeout(() => setGameState('playing'), 2000);
                     }}
                     onShare={() => {
@@ -441,7 +462,92 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
                         navigation.navigate('Home');
                     }}
                 />
+
+                {/* Menu Modal */}
+                <Modal
+                    visible={showMenuModal}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setShowMenuModal(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.menuModalOverlay}
+                        activeOpacity={1}
+                        onPress={() => setShowMenuModal(false)}
+                    >
+                        <View style={styles.menuModalContent}>
+                            <View style={styles.menuModalHeader}>
+                                <Text style={styles.menuModalTitle}>Game Menu</Text>
+                                <TouchableOpacity
+                                    onPress={() => setShowMenuModal(false)}
+                                    style={styles.menuModalCloseButton}
+                                >
+                                    <Icon name="close" size={24} color={COLORS.text} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <TouchableOpacity
+                                style={styles.menuOption}
+                                onPress={handleGiveUp}
+                                disabled={gameState !== 'playing'}
+                            >
+                                <Icon
+                                    name="flag"
+                                    size={24}
+                                    color={gameState === 'playing' ? COLORS.error : COLORS.textSecondary}
+                                />
+                                <View style={styles.menuOptionTextContainer}>
+                                    <Text style={[
+                                        styles.menuOptionTitle,
+                                        gameState !== 'playing' && styles.menuOptionDisabled
+                                    ]}>
+                                        Give Up
+                                    </Text>
+                                    <Text style={styles.menuOptionDescription}>
+                                        Forfeit the match and lose ELO
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <View style={styles.menuDivider} />
+
+                            <TouchableOpacity
+                                style={styles.menuOption}
+                                onPress={handleExit}
+                            >
+                                <Icon
+                                    name="exit-outline"
+                                    size={24}
+                                    color={COLORS.text}
+                                />
+                                <View style={styles.menuOptionTextContainer}>
+                                    <Text style={styles.menuOptionTitle}>
+                                        Exit Match
+                                    </Text>
+                                    <Text style={styles.menuOptionDescription}>
+                                        Leave the game and return to home
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
             </Animated.View>
+
+            {/* Loading Overlay */}
+            {gameState === 'waiting' && (
+                <Animated.View
+                    style={[
+                        styles.loadingOverlay,
+                        { opacity: waitingDotAnim }
+                    ]}
+                >
+                    <View style={styles.loadingContent}>
+                        <ActivityIndicator size="large" color={COLORS.secondary} />
+                        <Text style={styles.loadingText}>Finding opponent...</Text>
+                    </View>
+                </Animated.View>
+            )}
         </SafeAreaView>
     );
 };
@@ -472,21 +578,129 @@ const styles = StyleSheet.create({
         color: COLORS.text,
         fontFamily: getFont('bold').fontFamily,
     },
-    waitingBanner: {
-        backgroundColor: COLORS.warning,
-        paddingVertical: SPACING.sm,
-        alignItems: 'center',
-        marginHorizontal: SPACING.lg,
-        marginTop: SPACING.md,
-        borderRadius: 8,
-        flexDirection: 'row',
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
         justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
     },
-    waitingText: {
-        color: COLORS.background,
-        fontSize: FONT_SIZES.md,
+    loadingContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.lg,
+    },
+    loadingText: {
+        color: COLORS.text,
+        fontSize: FONT_SIZES.lg,
         fontWeight: 'bold',
         fontFamily: getFont('bold').fontFamily,
+        marginTop: SPACING.md,
+    },
+    playersSection: {
+        marginTop: SPACING.sm,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    playerCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.card,
+        borderRadius: 12,
+        paddingHorizontal: SPACING.xs,
+        paddingVertical: SPACING.xs,
+        borderWidth: 1.5,
+        borderColor: COLORS.border,
+        gap: SPACING.sm,
+    },
+    yourPlayerCard: {
+        borderColor: COLORS.text,
+    },
+    playerAvatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: COLORS.background,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: COLORS.error,
+    },
+    yourAvatar: {
+        borderColor: COLORS.text,
+    },
+    playerDetails: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        flexDirection: 'column',
+
+    },
+    playerName: {
+        fontSize: FONT_SIZES.md,
+        fontWeight: 'bold',
+        color: COLORS.text,
+        fontFamily: FONT_FAMILIES.bold,
+    },
+    eloContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
+        marginTop: 2,
+    },
+    playerElo: {
+        fontSize: FONT_SIZES.xs,
+        color: COLORS.textSecondary,
+        fontFamily: getFont('medium').fontFamily,
+    },
+    movesContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
+        marginTop: 2,
+    },
+    movesText: {
+        fontSize: FONT_SIZES.xs,
+        color: COLORS.textSecondary,
+        fontFamily: getFont('regular').fontFamily,
+    },
+    timerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.background,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 4,
+        borderRadius: 8,
+        gap: 4,
+    },
+    activeTimer: {
+        backgroundColor: COLORS.primary,
+    },
+    timerText: {
+        fontSize: FONT_SIZES.xl,
+        color: COLORS.primary,
+        fontFamily: FONT_FAMILIES.bold,
+    },
+    activeTimerText: {
+        color: COLORS.text,
+    },
+    progressIndicator: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 40,
+    },
+    progressText: {
+        fontSize: FONT_SIZES.xs,
+        color: COLORS.error,
+        fontFamily: getFont('bold').fontFamily,
+    },
+    yourProgressText: {
+        color: COLORS.text,
     },
     playerInfo: {
         flexDirection: 'row',
@@ -504,52 +718,6 @@ const styles = StyleSheet.create({
         borderColor: COLORS.primary,
         backgroundColor: COLORS.card,
     },
-    playerAvatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: COLORS.background,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: SPACING.md,
-        borderWidth: 2,
-        borderColor: COLORS.error,
-    },
-    yourAvatar: {
-        borderColor: COLORS.primary,
-    },
-    playerDetails: {
-        flex: 1,
-    },
-    playerName: {
-        fontSize: FONT_SIZES.md,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        fontFamily: getFont('bold').fontFamily,
-    },
-    playerElo: {
-        fontSize: FONT_SIZES.sm,
-        color: COLORS.textSecondary,
-        fontFamily: getFont('regular').fontFamily,
-        marginTop: 2,
-    },
-    timerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.background,
-        paddingHorizontal: SPACING.md,
-        paddingVertical: SPACING.sm,
-        borderRadius: 8,
-    },
-    activeTimer: {
-        backgroundColor: COLORS.primary,
-    },
-    timerText: {
-        fontSize: FONT_SIZES.md,
-        fontWeight: 'bold',
-        color: COLORS.textSecondary,
-        fontFamily: getFont('bold').fontFamily,
-    },
     progressBarContainer: {
         height: 6,
         backgroundColor: COLORS.card,
@@ -562,55 +730,102 @@ const styles = StyleSheet.create({
         height: '100%',
         borderRadius: 3,
     },
-    puzzleObjective: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.card,
+    objectiveSection: {
         marginHorizontal: SPACING.lg,
         marginTop: SPACING.md,
-        paddingHorizontal: SPACING.md,
-        paddingVertical: SPACING.sm,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: COLORS.warning,
+        marginBottom: SPACING.sm,
     },
-    puzzleObjectiveText: {
+    objectiveCard: {
+        backgroundColor: COLORS.card,
+        borderRadius: 12,
+        padding: SPACING.md,
+        borderWidth: 1.5,
+        borderColor: COLORS.secondary,
+        borderLeftWidth: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.sm,
+    },
+    objectiveHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.xs,
+        marginBottom: SPACING.xs,
+    },
+    objectiveLabel: {
+        fontSize: FONT_SIZES.xs,
+        color: COLORS.secondary,
+        fontFamily: getFont('bold').fontFamily,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+    },
+    objectiveText: {
         fontSize: FONT_SIZES.sm,
         color: COLORS.text,
         fontFamily: getFont('medium').fontFamily,
-        marginLeft: SPACING.sm,
-    },
-    wagerContainer: {
-        alignItems: 'center',
-        marginHorizontal: SPACING.lg,
-        marginTop: SPACING.sm,
-    },
-    wagerBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.card,
-        paddingHorizontal: SPACING.md,
-        paddingVertical: SPACING.sm,
-        borderRadius: 20,
-        gap: SPACING.xs,
-        borderWidth: 2,
-        borderColor: COLORS.secondary,
-    },
-    wagerText: {
-        fontSize: FONT_SIZES.md,
-        color: COLORS.secondary,
-        fontWeight: 'bold',
-        fontFamily: getFont('bold').fontFamily,
-    },
-    wagerLabel: {
-        fontSize: FONT_SIZES.xs,
-        color: COLORS.textSecondary,
-        marginTop: SPACING.xs,
-        fontFamily: getFont('regular').fontFamily,
+        lineHeight: 20,
     },
     boardContainer: {
         alignItems: 'center',
         marginVertical: SPACING.md,
+    },
+    bottomInfoSection: {
+        marginHorizontal: SPACING.lg,
+        marginBottom: SPACING.sm,
+    },
+    wagerPoolCard: {
+        backgroundColor: COLORS.card,
+        borderRadius: 12,
+        padding: SPACING.lg,
+        borderWidth: 1.5,
+        borderColor: COLORS.border,
+    },
+    wagerPoolRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        gap: SPACING.lg,
+    },
+    wagerPoolLeft: {
+        flex: 1,
+    },
+    wagerPoolRight: {
+        flex: 1,
+        alignItems: 'flex-end',
+    },
+    wagerLabel: {
+        fontSize: FONT_SIZES.xs,
+        color: COLORS.textSecondary,
+        fontFamily: getFont('medium').fontFamily,
+        marginBottom: SPACING.xs,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    wagerAmountContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.xs,
+    },
+    wagerAmount: {
+        fontSize: FONT_SIZES.lg,
+        color: COLORS.text,
+        fontFamily: getFont('bold').fontFamily,
+        fontWeight: 'bold',
+    },
+    poolAmountContainer: {
+        alignItems: 'flex-end',
+    },
+    poolAmount: {
+        fontSize: FONT_SIZES.xl,
+        color: COLORS.secondary,
+        fontFamily: getFont('bold').fontFamily,
+        fontWeight: 'bold',
+    },
+    poolOdds: {
+        fontSize: FONT_SIZES.xs,
+        color: COLORS.textSecondary,
+        fontFamily: getFont('medium').fontFamily,
+        marginTop: 2,
     },
     controls: {
         flexDirection: 'row',
@@ -638,6 +853,69 @@ const styles = StyleSheet.create({
         fontSize: FONT_SIZES.sm,
         color: COLORS.textSecondary,
         fontFamily: getFont('medium').fontFamily,
+    },
+    menuModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'flex-end',
+    },
+    menuModalContent: {
+        backgroundColor: COLORS.card,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingBottom: SPACING.xl,
+        borderTopWidth: 1,
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderColor: COLORS.border,
+    },
+    menuModalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: SPACING.lg,
+        paddingVertical: SPACING.lg,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.border,
+    },
+    menuModalTitle: {
+        fontSize: FONT_SIZES.xl,
+        fontWeight: 'bold',
+        color: COLORS.text,
+        fontFamily: getFont('bold').fontFamily,
+    },
+    menuModalCloseButton: {
+        padding: SPACING.xs,
+    },
+    menuOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: SPACING.lg,
+        paddingVertical: SPACING.lg,
+        gap: SPACING.md,
+    },
+    menuOptionTextContainer: {
+        flex: 1,
+    },
+    menuOptionTitle: {
+        fontSize: FONT_SIZES.md,
+        fontWeight: 'bold',
+        color: COLORS.text,
+        fontFamily: getFont('bold').fontFamily,
+    },
+    menuOptionDescription: {
+        fontSize: FONT_SIZES.sm,
+        color: COLORS.textSecondary,
+        fontFamily: getFont('regular').fontFamily,
+        marginTop: 2,
+    },
+    menuOptionDisabled: {
+        color: COLORS.textSecondary,
+    },
+    menuDivider: {
+        height: 1,
+        backgroundColor: COLORS.border,
+        marginHorizontal: SPACING.lg,
     },
 });
 
