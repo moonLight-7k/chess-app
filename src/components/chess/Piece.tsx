@@ -1,13 +1,11 @@
-import { Chess, Move } from 'chess.js';
 import React, { useCallback } from 'react';
 import { StyleSheet, Image, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-    runOnJS,
     useAnimatedStyle,
     useSharedValue,
-    withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { toTranslation, SIZE, toPosition, Vector, Position } from './Notation';
 
@@ -27,7 +25,6 @@ const styles = StyleSheet.create({
         height: SIZE,
         borderWidth: 3,
         borderColor: '#FFD700',
-        borderRadius: SIZE * 0.1,
         backgroundColor: 'rgba(255, 215, 0, 0.2)',
     },
 });
@@ -89,11 +86,16 @@ const ChessPiece = ({
     enabled,
     isSelected,
 }: PieceProps) => {
+    // Simple position tracking for tap-to-select/tap-to-move
+    const translateX = useSharedValue(startPosition.x * SIZE);
+    const translateY = useSharedValue(startPosition.y * SIZE);
+
+    // DRAG GESTURE DISABLED - Using tap-to-select/tap-to-move only
+    // Uncomment below if you want drag-and-drop functionality
+    /*
     const isGestureActive = useSharedValue(false);
     const offsetX = useSharedValue(0);
     const offsetY = useSharedValue(0);
-    const translateX = useSharedValue(startPosition.x * SIZE);
-    const translateY = useSharedValue(startPosition.y * SIZE);
 
     const movePiece = useCallback(
         (to: Position) => {
@@ -123,19 +125,19 @@ const ChessPiece = ({
         },
         [isGestureActive, offsetX, offsetY, onMove, translateX, translateY]
     );
+    */
 
-    const handleTap = useCallback(() => {
-        if (enabled) {
-            onSelect(square);
-        }
-    }, [enabled, square, onSelect]);
-
+    // TAP-TO-SELECT/TAP-TO-MOVE - Active
     const tapGesture = Gesture.Tap()
         .onEnd(() => {
-            runOnJS(handleTap)();
+            if (enabled) {
+                scheduleOnRN(onSelect, square);
+            }
         })
         .enabled(enabled);
 
+    // DRAG-AND-DROP - Disabled (uncomment to enable)
+    /*
     const panGesture = Gesture.Pan()
         .onStart(() => {
             'worklet';
@@ -156,7 +158,20 @@ const ChessPiece = ({
         .enabled(enabled);
 
     const composedGesture = Gesture.Exclusive(panGesture, tapGesture);
+    */
 
+    // Simple static positioning for tap interaction
+    const style = useAnimatedStyle(() => ({
+        position: 'absolute',
+        zIndex: 10,
+        transform: [
+            { translateX: translateX.value },
+            { translateY: translateY.value },
+        ],
+    }));
+
+    // DRAG VISUAL FEEDBACK - Disabled (uncomment to enable)
+    /*
     const style = useAnimatedStyle(() => ({
         position: 'absolute',
         zIndex: isGestureActive.value ? 100 : 10,
@@ -193,19 +208,32 @@ const ChessPiece = ({
             transform: [{ translateX: translation.x }, { translateY: translation.y }],
         };
     });
+    */
 
     return (
         <>
-            <Animated.View style={original}>
-                {isSelected && <View style={styles.selectedBorder} />}
-            </Animated.View>
-            <Animated.View style={underlay} />
-            <GestureDetector gesture={composedGesture}>
+            {/* TAP-TO-SELECT/TAP-TO-MOVE - Simple interaction */}
+            <GestureDetector gesture={tapGesture}>
                 <Animated.View style={style}>
                     {isSelected && <View style={styles.selectedBorder} />}
                     <Image source={PIECES[id]} style={styles.piece} />
                 </Animated.View>
             </GestureDetector>
+
+            {/* DRAG-AND-DROP VISUAL ELEMENTS - Disabled (uncomment to enable)
+            <>
+                <Animated.View style={original}>
+                    {isSelected && <View style={styles.selectedBorder} />}
+                </Animated.View>
+                <Animated.View style={underlay} />
+                <GestureDetector gesture={composedGesture}>
+                    <Animated.View style={style}>
+                        {isSelected && <View style={styles.selectedBorder} />}
+                        <Image source={PIECES[id]} style={styles.piece} />
+                    </Animated.View>
+                </GestureDetector>
+            </>
+            */}
         </>
     );
 };
