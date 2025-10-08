@@ -20,9 +20,9 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff",
-        "googleServicesFile": "./google-services.json"
+        "backgroundColor": "#ffffff"
       },
+      "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.moonlight7k.chessDuel"
@@ -32,14 +32,6 @@
     },
     "assetBundlePatterns": [
       "**/*"
-    ],
-    "fonts": [
-      "./assets/fonts/Orbitron-Regular.ttf",
-      "./assets/fonts/Orbitron-Medium.ttf",
-      "./assets/fonts/Orbitron-SemiBold.ttf",
-      "./assets/fonts/Orbitron-Bold.ttf",
-      "./assets/fonts/Orbitron-ExtraBold.ttf",
-      "./assets/fonts/Orbitron-Black.ttf"
     ]
   }
 }

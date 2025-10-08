@@ -49,7 +49,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
         {/* Chess Branding */}
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <Icon name="chess-king" size={80} color={COLORS.primary} />
+            <Icon name="extension-puzzle" size={80} color={COLORS.primary} />
           </View>
           <Text style={styles.title}>Chess Puzzle Racing</Text>
           <Text style={styles.subtitle}>

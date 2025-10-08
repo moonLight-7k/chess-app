@@ -1,4 +1,3 @@
-// User types
 export interface User {
   uid: string;
   email: string | null;
@@ -9,14 +8,12 @@ export interface User {
   updatedAt?: string;
 }
 
-// Auth types
 export interface AuthState {
   user: User | null;
   loading: boolean;
   error: string | null;
 }
 
-// Navigation types
 export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;

@@ -9,7 +9,6 @@ import {
 import { auth } from '../config/firebase';
 import { User } from '../types';
 
-// Convert Firebase user to our User type
 export const mapFirebaseUser = (firebaseUser: FirebaseUser): User => ({
   uid: firebaseUser.uid,
   email: firebaseUser.email,
@@ -20,7 +19,6 @@ export const mapFirebaseUser = (firebaseUser: FirebaseUser): User => ({
   updatedAt: firebaseUser.metadata.lastSignInTime,
 });
 
-// Sign in with email and password
 export const signIn = async (email: string, password: string): Promise<User> => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -30,7 +28,6 @@ export const signIn = async (email: string, password: string): Promise<User> => 
   }
 };
 
-// Sign up with email and password
 export const signUp = async (
   email: string,
   password: string,
@@ -39,7 +36,6 @@ export const signUp = async (
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-    // Update profile with display name if provided
     if (displayName && userCredential.user) {
       await updateProfile(userCredential.user, { displayName });
     }
@@ -50,7 +46,6 @@ export const signUp = async (
   }
 };
 
-// Sign out
 export const signOut = async (): Promise<void> => {
   try {
     await firebaseSignOut(auth);
@@ -59,7 +54,6 @@ export const signOut = async (): Promise<void> => {
   }
 };
 
-// Reset password
 export const resetPassword = async (email: string): Promise<void> => {
   try {
     await sendPasswordResetEmail(auth, email);
@@ -68,7 +62,6 @@ export const resetPassword = async (email: string): Promise<void> => {
   }
 };
 
-// Update user profile
 export const updateUserProfile = async (
   displayName?: string,
   photoURL?: string

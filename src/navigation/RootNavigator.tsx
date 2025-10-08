@@ -5,7 +5,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { RootStackParamList, MainStackParamList } from '../types';
 import { ActivityIndicator, View } from 'react-native';
 
-// Import screens
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
@@ -45,10 +44,8 @@ const RootNavigator = () => {
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          // User is signed in
           <RootStack.Screen name="Main" component={MainNavigator} />
         ) : (
-          // User is not signed in
           <>
             <RootStack.Screen name="Welcome" component={WelcomeScreen} />
             <RootStack.Screen name="Login" component={LoginScreen} />

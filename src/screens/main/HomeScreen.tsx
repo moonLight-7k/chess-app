@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Vibration } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, FONT_SIZES, FONT_FAMILIES } from '../../constants/theme';
@@ -15,16 +15,67 @@ type HomeScreenProps = {
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { user } = useAuth();
 
+  // Animation refs
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Entrance animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Pulse animation for Quick Match button
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.03,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulseAnimation.start();
+
+    return () => {
+      pulseAnimation.stop();
+    };
+  }, []);
+
+  const handleButtonPress = (callback: () => void) => {
+    Vibration.vibrate(30);
+    callback();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Top Navigation Bar */}
-      <View style={styles.topNav}>
+      <Animated.View style={[styles.topNav, { opacity: fadeAnim }]}>
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => {
+          onPress={() => handleButtonPress(() => {
             // TODO: Implement wallet connection
             console.log('Connect Wallet');
-          }}
+          })}
+          accessible={true}
+          accessibilityLabel="Connect wallet"
+          accessibilityRole="button"
         >
           <Icon name="wallet-outline" size={24} color={COLORS.text} />
           <Text style={styles.navButtonText}>Wallet</Text>
@@ -32,7 +83,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.navigate('Leaderboard')}
+          onPress={() => handleButtonPress(() => navigation.navigate('Leaderboard'))}
+          accessible={true}
+          accessibilityLabel="View leaderboard"
+          accessibilityRole="button"
         >
           <Icon name="trophy-outline" size={24} color={COLORS.text} />
           <Text style={styles.navButtonText}>Leaderboard</Text>
@@ -40,15 +94,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.navigate('Profile')}
+          onPress={() => handleButtonPress(() => navigation.navigate('Profile'))}
+          accessible={true}
+          accessibilityLabel="View profile"
+          accessibilityRole="button"
         >
           <Icon name="person-outline" size={24} color={COLORS.text} />
           <Text style={styles.navButtonText}>Profile</Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {/* User Stats */}
-      <View style={styles.statsContainer}>
+      <Animated.View style={[styles.statsContainer, { opacity: fadeAnim }]}>
         <View style={styles.statCard}>
           <Icon name="person-circle" size={18} color={COLORS.primary} />
           <Text style={styles.statValue}>{user?.displayName || 'Player'}</Text>
@@ -63,7 +120,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           <Text style={styles.statValue}>0</Text>
           <Text style={styles.statLabel}>Wins</Text>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Main Content */}
       <View style={styles.content}>
@@ -239,6 +296,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     opacity: 0.6,
+    marginTop: SPACING.md,
   },
   cardTitle: {
     fontSize: FONT_SIZES.lg,

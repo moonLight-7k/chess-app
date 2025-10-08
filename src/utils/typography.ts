@@ -5,11 +5,6 @@ export interface FontStyle {
     fontWeight?: string;
 }
 
-/**
- * Get font style object for use in React Native Text components
- * @param weight - Font weight variant (regular, medium, semiBold, bold, extraBold, black)
- * @returns Object with fontFamily and fontWeight properties
- */
 export const getFont = (weight: keyof typeof FONT_FAMILIES = 'regular'): FontStyle => {
     return {
         fontFamily: FONT_FAMILIES[weight],
@@ -17,9 +12,6 @@ export const getFont = (weight: keyof typeof FONT_FAMILIES = 'regular'): FontSty
     };
 };
 
-/**
- * Typography helper for creating consistent text styles
- */
 export const typography = {
     heading1: {
         ...getFont('bold'),

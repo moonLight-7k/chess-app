@@ -215,7 +215,6 @@ const styles = StyleSheet.create({
         borderColor: '#00FFA3',
         alignSelf: 'center',
     },
-    // Victory Section
     victorySection: {
         alignItems: 'center',
         marginBottom: SPACING.lg,
@@ -238,7 +237,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingHorizontal: SPACING.sm,
     },
-    // Stats Row
     statsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -268,7 +266,6 @@ const styles = StyleSheet.create({
         color: '#A0A0B0',
         fontFamily: getFont('regular').fontFamily,
     },
-    // Action Buttons
     actionButtons: {
         flexDirection: 'row',
         gap: SPACING.sm,
@@ -308,7 +305,6 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontFamily: getFont('semiBold').fontFamily,
     },
-    // Puzzle Solution Section
     solutionSection: {
         backgroundColor: '#0F0F1E',
         borderRadius: 12,
@@ -347,7 +343,6 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontFamily: getFont('regular').fontFamily,
     },
-    // Badge Section
     badgeSection: {
         backgroundColor: '#0F0F1E',
         borderRadius: 12,
